@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electrical Work Record</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+      color: #1e293b;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+    }
+
+    h2 {
+      color: #0f766e;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 18px;
+      border: none;
+      border-radius: 8px;
+      background: #0f766e;
+      color: white;
+      font-size: 16px;
+    }
+
+    .record {
+      background: #f8fafc;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 8px;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Electrical Work Record</h2>
+
+    <label>အိမ် / အလုပ်နေရာ</label>
+    <input id="place" placeholder="ဥပမာ - House A">
+
+    <label>ပြဿနာ</label>
+    <input id="problem" placeholder="ဥပမာ - မီးမလင်းခြင်း">
+
+    <label>ပြုပြင်ခဲ့သည့်အလုပ်</label>
+    <textarea id="work" rows="3" placeholder="ဘာတွေပြုပြင်ခဲ့သလဲ"></textarea>
+
+    <label>ကုန်ကျစရိတ် (RM)</label>
+    <input id="cost" type="number" min="0" step="0.01" placeholder="ဥပမာ - 50">
+
+    <button onclick="saveRecord()">မှတ်တမ်းသိမ်းမယ်</button>
+
+    <h3>သိမ်းထားသောမှတ်တမ်းများ</h3>
+    <div id="records"></div>
+  </div>
+
+  <script>
+    function saveRecord() {
+      const place = document.getElementById("place").value.trim();
+      const problem = document.getElementById("problem").value.trim();
+      const work = document.getElementById("work").value.trim();
+      const cost = document.getElementById("cost").value;
+
+      if (!place || !problem) {
+        alert("အလုပ်နေရာနဲ့ ပြဿနာကို ဖြည့်ပါ။");
+        return;
+      }
+
+      const record = {
+        place,
+        problem,
+        work,
+        cost,
+        date: new Date().toLocaleDateString()
+      };
+
+      const records = JSON.parse(
+        localStorage.getItem("electricalRecords") || "[]"
+      );
+
+      records.unshift(record);
+      localStorage.setItem(
+        "electricalRecords",
+        JSON.stringify(records)
+      );
+
+      document.getElementById("place").value = "";
+      document.getElementById("problem").value = "";
+      document.getElementById("work").value = "";
+      document.getElementById("cost").value = "";
+
+      showRecords();
+    }
+
+    function showRecords() {
+      const records = JSON.parse(
+        localStorage.getItem("electricalRecords") || "[]"
+      );
+
+      document.getElementById("records").innerHTML =
+        records.map(record => `
+          <div class="record">
+            <strong>${escapeHTML(record.place)}</strong><br>
+            ရက်စွဲ: ${escapeHTML(record.date)}<br>
+            ပြဿနာ: ${escapeHTML(record.problem)}<br>
+            အလုပ်: ${escapeHTML(record.work || "-")}<br>
+            ကုန်ကျစရိတ်: RM ${escapeHTML(record.cost || "0")}
+          </div>
+        `).join("");
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    showRecords();
+  </script>
+</body>
+</html>
